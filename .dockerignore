@@ -2,3 +2,4 @@
 .gitignore
 .dockerignore
 README.md
+install-packages.R

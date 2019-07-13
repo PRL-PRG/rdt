@@ -10,9 +10,9 @@ RUN apt-get update
 RUN apt-get -y dist-upgrade
 
 ################################################################################
-## Sudo
+## Miscellaneous
 ################################################################################
-RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install sudo
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install sudo apt-utils
 
 ################################################################################
 ## Locale
@@ -21,10 +21,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install sudo
 ## http://jaredmarkell.com/docker-and-locales/
 ################################################################################
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install locales
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
-  locale-gen en_US.UTF-8 && \
-  /usr/sbin/update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
-
+RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+RUN locale-gen en_US.UTF-8
+RUN /usr/sbin/update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
@@ -37,7 +36,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install fish bash zsh
 ################################################################################
 ## Editor
 ################################################################################
-RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install vim emacs
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install vim emacs-nox
 
 ################################################################################
 ## Version Control
@@ -57,6 +56,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install r-base r-base-dev
 
 ################################################################################
 ## Rcheckserver
+## https://github.com/jeroen/rcheckserver/blob/master/debian/Dockerfile#L18
 ################################################################################
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install debian-keyring
 RUN gpg --recv-keys 3B1C3B572302BCB1
@@ -73,6 +73,11 @@ USER tracer
 WORKDIR /home/tracer
 RUN mkdir -p /home/tracer/library
 ENV R_LIBS_USER /home/tracer/library
+ENV R_KEEP_PKG_SOURCE 1
+ENV R_ENABLE_JIT 0
+ENV R_COMPILE_PKGS 0
+ENV R_DISABLE_BYTECODE 1
+ENV OMP_NUM_THREADS 1
 
 ################################################################################
 ## R-dyntrace
@@ -87,7 +92,8 @@ RUN git clone https://github.com/Bioconductor/BiocManager.git
 RUN R-dyntrace/bin/R CMD INSTALL BiocManager
 
 ################################################################################
-## BioConductor Mirror :: https://bioconductor.org/about/mirrors/mirror-how-to/
+## BioConductor Mirror
+## https://bioconductor.org/about/mirrors/mirror-how-to/
 ################################################################################
 RUN mkdir -p /home/tracer/mirrors/bioconductor/3.9
 RUN ln -s /home/tracer/mirrors/bioconductor/3.9 /home/tracer/mirrors/bioconductor/release
@@ -129,9 +135,10 @@ RUN rsync -zrtlv --delete \
   master.bioconductor.org::release /home/tracer/mirrors/bioconductor/release
 
 ################################################################################
-## CRAN Mirror :: https://cran.r-project.org/mirror-howto.html
+## CRAN Mirror
+## https://cran.r-project.org/mirror-howto.html
 ################################################################################
-RUN mkdir -p /home/tracer/mirrors/CRAN
+RUN mkdir -p /home/tracer/mirrors/cran
 RUN rsync -zrtlv --delete \
   --include '/src' \
   --include '/src/contrib' \
@@ -139,7 +146,14 @@ RUN rsync -zrtlv --delete \
   --include '/src/contrib/Symlink' \
   --include '/src/contrib/Symlink/**' \
   --exclude '**' \
-  cran.r-project.org::CRAN /home/tracer/mirrors/CRAN
+  cran.r-project.org::CRAN /home/tracer/mirrors/cran
+
+################################################################################
+## Install all R packages
+################################################################################
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install nproc
+COPY install-packages.R ~/
+R-dyntrace/bin/R --file=install-packages.R
 
 ################################################################################
 ## Metadata
