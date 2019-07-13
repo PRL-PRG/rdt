@@ -16,6 +16,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install sudo
 
 ################################################################################
 ## Locale
+## https://hub.docker.com/_/debian/
+## https://github.com/docker-library/postgres/blob/69bc540ecfffecce72d49fa7e4a46680350037f9/9.6/Dockerfile#L21-L24
+## http://jaredmarkell.com/docker-and-locales/
 ################################################################################
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install locales
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
@@ -48,6 +51,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install curl wget rsync
 
 ################################################################################
 ## R Base
+## https://cran.r-project.org/bin/linux/debian/
 ################################################################################
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install r-base r-base-dev
 
@@ -65,7 +69,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -yq install rcheckserver
 ## User
 ################################################################################
 RUN useradd -ms /bin/bash -G sudo tracer
-
 USER tracer
 WORKDIR /home/tracer
 RUN mkdir -p /home/tracer/library
