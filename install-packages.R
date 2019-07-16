@@ -8,7 +8,7 @@ ncpus <- as.integer(system2("nproc", stdout = TRUE, stderr = TRUE))
 cat("Installing packages with", ncpus, "cpus\n")
 
 install(available(),
-        Ncpus = npus,
+        Ncpus = 12,
         keep_outputs = TRUE,
         INSTALL_opts = c(## byte-compile packages
                          ##"--byte-compile",

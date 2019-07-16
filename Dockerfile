@@ -36,7 +36,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install fish bash zsh
 ################################################################################
 ## Editor
 ################################################################################
-RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install vim emacs-nox
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install vim emacs
 
 ################################################################################
 ## Version Control
@@ -143,6 +143,7 @@ RUN rsync -zrtlv --delete \
   --include '/src' \
   --include '/src/contrib' \
   --include '/src/contrib/*.tar.gz' \
+  --include '/src/contrib/PACKAGES' \
   --include '/src/contrib/Symlink' \
   --include '/src/contrib/Symlink/**' \
   --exclude '**' \
@@ -151,9 +152,9 @@ RUN rsync -zrtlv --delete \
 ################################################################################
 ## Install all R packages
 ################################################################################
-RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install nproc
+RUN mkdir -p /home/tracer/mirrors/bioconductor/packages && ln -s /home/tracer/mirrors/bioconductor/3.9 /home/tracer/mirrors/bioconductor/packages/3.8
 COPY install-packages.R ~/
-R-dyntrace/bin/R --file=install-packages.R
+RUN R-dyntrace/bin/R --file=~/install-packages.R
 
 ################################################################################
 ## Metadata
