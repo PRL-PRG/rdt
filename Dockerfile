@@ -12,7 +12,7 @@ RUN apt-get -y dist-upgrade
 ################################################################################
 ## Miscellaneous
 ################################################################################
-RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install sudo apt-utils
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install apt-utils sudo
 
 ################################################################################
 ## Locale
@@ -44,9 +44,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install vim emacs
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install git subversion
 
 ################################################################################
-## Data Transfer
+## File Transfer
 ################################################################################
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install curl wget rsync
+
+################################################################################
+## Documents
+################################################################################
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install texinfo texlive-full pandoc
 
 ################################################################################
 ## R Base
