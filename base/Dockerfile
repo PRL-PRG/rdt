@@ -31,22 +31,22 @@ ENV LC_ALL en_US.UTF-8
 ################################################################################
 ## Shell
 ################################################################################
-##RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install fish bash zsh
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install fish bash zsh
 
 ################################################################################
 ## Editor
 ################################################################################
-##RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install vim emacs
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install vim emacs
 
 ################################################################################
 ## Version Control
 ################################################################################
-##RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install git subversion
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install git subversion
 
 ################################################################################
 ## Data Transfer
 ################################################################################
-##RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install curl wget rsync
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install curl wget rsync
 
 ################################################################################
 ## R Base
@@ -60,9 +60,68 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install libgit2-dev
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install libssl-dev
 #xml2
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install libxml2-dev
+#curl
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install libcurl4-openssl-dev
+#rJava
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install openjdk-11-jdk default-jdk
+#RMySQL
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install default-libmysqlclient-dev ##libmariadb-dev libmariadb-client-dev libmariadb-client-lgpl-dev 
+#RSQLite
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install libsqlite3-dev
+#odbc
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install unixodbc-dev
+#rgl
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install freeglut3-dev libfreetype6-dev
+# promise-dyntracing-experiment
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install xvfb parallel expect libzstd-dev
+################################################################################
+## User
+################################################################################
+RUN useradd -ms /bin/bash -G sudo tracer
+USER tracer
+WORKDIR /home/tracer
+RUN mkdir -p /home/tracer/library
+ENV R_LIBS_USER /home/tracer/library
+ENV R_KEEP_PKG_SOURCE 1
+ENV R_ENABLE_JIT 0
+ENV R_COMPILE_PKGS 0
+ENV R_DISABLE_BYTECODE 1
+ENV OMP_NUM_THREADS 1
 
-RUN Rscript -e "install.packages(c('tidyverse', 'dplyr', 'devtools', 'formatR', 'remotes', 'selectr', 'caTools', 'BiocManager'))"
+################################################################################
+## R-dyntrace
+################################################################################
+RUN git clone --branch r-3.5.0 https://github.com/PRL-PRG/R-dyntrace.git
+RUN cd R-dyntrace && ./build
 
+################################################################################
+## promisedyntracer
+################################################################################
+RUN git clone --branch oopsla-2019-study-of-laziness-v1 https://github.com/aviralg/promisedyntracer.git
+RUN cd promisedyntracer && make
+
+################################################################################
+## promise-dyntracing-experiment
+################################################################################
+RUN git clone --branch r-3.5.0 https://github.com/PRL-PRG/promise-dyntracing-experiment.git
+RUN cd promise-dyntracing-experiment && make install-dependencies DEPENDENCIES_FILEPATH=scripts/package-dependencies.txt
+
+
+##COPY dependencies.txt /home/tracer/dependencies.txt
+##RUN Rscript -e "x <- scan('/home/tracer/dependencies.txt', character(), quote = ''); install.packages(x, Ncpus = 12, repos='http://cran.studio.com/')" > status.txt
+
+##make: *** [Makefile:353: rJava.ts] Error 1
+##make: *** [Makefile:588: RMySQL.ts] Error 1
+##make: *** [Makefile:813: pkgload.ts] Error 1
+##make: *** [Makefile:843: odbc.ts] Error 1
+##make: *** [Makefile:953: rgl.ts] Error 1
+##make: Target 'all' not remade because of errors.
+##cat: XLConnectJars.out: No such file or directory
+##cat: xlsxjars.out: No such file or directory
+##cat: XLConnect.out: No such file or directory
+##cat: xlsx.out: No such file or directory
+##cat: roxygen2.out: No such file or directory
+##cat: devtools.out: No such file or directory
 
 ## libgit2 openssl
 
